@@ -4,15 +4,38 @@ This file provides guidance to AI coding agents (Claude Code, Cursor, Copilot, A
 
 ## Repository Overview
 
-```TODO: after installation of template, provide repository description```
+Re-usable components for multiple languages, platforms, and frameworks, by Digital Generalists.
+
+The repository is intended to house components for many platforms. The initial release contains a single iOS package, `DGCoreUI` (`apple/ios/core-ui/`): an Objective-C/UIKit framework providing the Tool Shelf (`DGToolShelfViewController`) and Presentation Cards (`DGCardPresentationViewController`) components, plus a SwiftUI `ReferenceImplementation` app that demonstrates them. See `README.md` for component details, supported versions, and integration steps.
 
 ### Repository Conventions
 
-```TODO: after installation of template, provide list of facts and perspectives that define how to understand and navigate the repository```
+- Components are organized by platform, then package: `apple/ios/core-ui/`. New platforms and frameworks go in sibling directories at the matching level (e.g. `apple/macos/`, `android/`, `web/react/`).
+- Each package is self-contained — its own project files, build configuration, and reference implementation. A package does not depend on files outside its directory.
+- Every package ships a reference implementation that demonstrates each of its components in a running application. It is the primary way component changes are verified.
+- Every new component is added to the Components table in `README.md`, with its prerequisites, supported versions, and build steps.
+- `.agents/` holds the AI agent skills, personas, commands, and references; `.claude/`, `.cursor/`, and `.opencode/` mirror it for each tool.
+
+#### DGCoreUI (iOS)
+
+- Framework target `DGCoreUI` supports iOS 17.0+; the `ReferenceImplementation` app targets iOS 27.0+. iPhone and iPad; no Mac Catalyst. Project files are from Xcode 27.1.
+- Framework source is Objective-C; the reference app is Swift/SwiftUI and wraps components with `UIViewControllerRepresentable`.
+- Source is grouped by component: `DGCoreUI/Toolshelf/`, `DGCoreUI/PresentationCards/`, and shared `DGCoreUI/Notifications/`. Shared enums, notification names, and display configuration structs live in `DGComponentTypeDefinitions.h`.
+- Every public header is listed in the `DGCoreUI.h` umbrella header and imported as `<DGCoreUI/...>`. Types use the `DG` prefix.
+- Components own no content: the host supplies buttons (with their targets and actions), menu definitions, cards, and styling. Components lay out, style, and transition.
+- Components communicate with their hosts through notifications (`DGNotificationManager`, names defined in `DGComponentTypeDefinitions.h`), e.g. `UI_SAVE_UI_STATE` and `UI_CARD_PRESENTATION_DISMISSED`.
+- Swift cannot import the C display configuration structs (they hold object pointers), so every initializer taking one has a variant taking the values individually. Keep the two in sync.
+- The shared `MajicComponents` scheme is stale (it references a target since renamed to `DGCoreUI`); build the framework by target, or through the `ReferenceImplementation` scheme.
 
 ### Repository Commands
 
-```TODO: after installation of template, provide list of actions and command invocations that define how to do things in the repository```
+- Build the DGCoreUI framework:
+  `xcodebuild -project apple/ios/core-ui/DGCoreUI.xcodeproj -target DGCoreUI -configuration Debug -sdk iphonesimulator build`
+- Build the reference app (and the framework it links):
+  `xcodebuild -project apple/ios/core-ui/DGCoreUI.xcodeproj -scheme ReferenceImplementation -destination 'generic/platform=iOS Simulator' build`
+- Run the reference app: open `apple/ios/core-ui/DGCoreUI.xcodeproj` in Xcode, select the `ReferenceImplementation` scheme and a simulator, press Cmd+R.
+- There are no automated tests yet.
+- List / install devcontainer configurations: `./.setup/add-devcontainer.sh --list`, `./.setup/add-devcontainer.sh <stack> [--full]`
 
 ### Repository Rules
 
